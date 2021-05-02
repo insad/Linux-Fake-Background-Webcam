@@ -100,6 +100,11 @@ added the ``rw`` attributes to do the virtual camera devices. If you already
 have already configured akvcam via webcamoid, you need to modify the
 ``/etc/akvcam/config.ini`` to add the ``rw`` attributes.
 
+### Disabling UEFI Secure boot
+Both v4l2loopback and Akvcam require custom kernel module. This might not be possible 
+if you have secure boot enabled. Please refer to your device manufacturer's manual 
+on disabling secure boot. 
+
 ### Python 3
 You will need Python 3. You need to have pip installed. Please make sure that
 you have installed the correct version pip, if you have both Python 2 and
@@ -133,12 +138,12 @@ Simply run
 Please refer to [DOCKER.md](DOCKER.md). The updated Docker related files were
 added by [liske](https://github.com/liske).
 
-Using Docker is unnecessary. However it makes starting up and shutting down
-the virtual webcam very easy and convenient. The only downside is that you
-lose the ability to change background and foreground images on the fly.
+Using Docker is unnecessary. However it makes starting up and shutting down the virtual webcam very easy and convenient.
+The only downside is that the  ability to change background and foreground images is slightly more complicated and
+has some limitations.
 
 ## Usage
-Assuming you are not using the Docker version, please also make sure that your
+Assuming you are not using the Docker version, overriding the ports settings, please also make sure that your
 TCP port ``127.0.0.1:9000`` is free, as we will be using it.
 
 You can change the port by setting the environment variable PORT. If you set a path, it will use a UNIX Socket instead.
@@ -162,11 +167,11 @@ The files that you might want to replace are the followings:
 If you want to change the files above in the middle of streaming, replace them
 and press ``CTRL-C``
 
-### fakecam.py
+### fakecam/fake.py
 Note that animated background is supported. You can use any video file that can
 be read by OpenCV.
 
-If you are not running fakecam.py under Docker, it supports the following options:
+If you are not running fake.py under Docker, it supports the following options:
 
     usage: fake.py [-h] [-W WIDTH] [-H HEIGHT] [-F FPS] [-S SCALE_FACTOR]
                 [-B BODYPIX_URL] [-w WEBCAM_PATH] [-v V4L2LOOPBACK_PATH]
@@ -210,7 +215,19 @@ If you are not running fakecam.py under Docker, it supports the following option
 ### bodypix/app.js
 If under/over-segmentation occurs, you can tweak ``segmentationThreshold``. To
 make the network run faster, you can change ``internalResolution``, however this
-will reduce segmentation accuracy.
+will reduce segmentation accuracy. Both and other variables can be changed by
+exposing them via environment variables before running bodypix. See the bodypix
+[manual](https://github.com/tensorflow/tfjs-models/blob/master/body-pix/README.md)
+for detailed information about these.
+
+```
+BPHFLIP     - Horizontal flip [ true, false ]
+BPIRES      - Internal Resolution [ 0.0, 1.0 ]
+BPMULTI     - Multiplier [ 0.0, 1.0 ]
+BPOUTSTRIDE - Output Stride [ 8, 16, 32 ]
+BPQBYTES    - Quantization bytes [ 1, 2, 4 ]
+BPSEGTHRES  - Segmentation Threshold [ 0.0, 1.0 ]
+```
 
 #### Compilation of Tensorflow C library
 Tensorflow.js uses Tensorflow C library. The default version shipped with
